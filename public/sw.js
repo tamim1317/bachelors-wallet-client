@@ -25,8 +25,12 @@ self.addEventListener('activate', e => {
 
 // Fetch — Network first, cache fallback
 self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+  
+  // API calls, external requests — skip করো
   if (e.request.method !== 'GET') return;
-  if (e.request.url.includes('/api/')) return;
+  if (url.hostname !== location.hostname) return;
+  if (url.pathname.startsWith('/api/')) return;
 
   e.respondWith(
     fetch(e.request)
