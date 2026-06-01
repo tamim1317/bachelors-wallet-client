@@ -27,4 +27,10 @@ export const generateBill     = (y, m)    => api.post(`/bills/generate/${y}/${m}
 export const getBillsByMonth  = (y, m)    => api.get(`/bills/${y}/${m}`);
 export const markAsPaid       = (id)      => api.patch(`/bills/pay/${id}`);
 
+// Income
+export const getIncomes         = (params) => api.get('/income', { params });
+export const createIncome       = (data)   => api.post('/income', data);
+export const deleteIncome       = (id)     => api.delete(`/income/${id}`);
+export const getIncomeSummary   = (month)  => api.get(`/income/summary/${month}`);
+
 export default api;
