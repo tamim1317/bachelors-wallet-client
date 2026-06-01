@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getMembers, getExpenses, getMonthlySummary } from '../utils/api';
 import { getIncomeSummary } from '../utils/api';
+import { requestNotificationPermission, setMealReminder } from '../utils/pwa';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, Legend
@@ -9,6 +10,24 @@ import {
 const now = new Date();
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+
+{/* Notification Button */}
+<div className="mb-5">
+  <button
+    onClick={async () => {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        setMealReminder();
+        toast.success('🔔 Notification চালু হয়েছে! রাত ৯টায় reminder পাবে।');
+      } else {
+        toast.error('Notification permission দিন');
+      }
+    }}
+    className="flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800 rounded-lg text-sm font-medium hover:bg-purple-100 dark:hover:bg-purple-900 transition">
+    🔔 Daily Meal Reminder চালু করো
+  </button>
+</div>
 
 // Animated counter hook
 function useCounter(target, duration = 1000) {
