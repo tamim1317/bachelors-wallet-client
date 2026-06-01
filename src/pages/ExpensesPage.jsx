@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getExpenses, createExpense, deleteExpense } from '../utils/api';
 import toast from 'react-hot-toast';
 
-const MESS_CATEGORIES    = ['বাজার', 'গ্যাস', 'বিদ্যুৎ', 'পানি', 'অন্যান্য'];
+const MESS_CATEGORIES     = ['বাজার', 'গ্যাস', 'বিদ্যুৎ', 'পানি', 'অন্যান্য'];
 const PERSONAL_CATEGORIES = ['রুম ভাড়া', 'বাইরে খাওয়া', 'ট্রান্সপোর্ট', 'মোবাইল রিচার্জ', 'পড়াশোনা', 'শপিং', 'অন্যান্য'];
 
 const now = new Date();
@@ -12,7 +12,10 @@ export default function ExpensesPage() {
   const [total, setTotal] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [tab, setTab] = useState('mess');
-  const [form, setForm] = useState({ type: 'mess', category: 'বাজার', amount: '', note: '', date: now.toISOString().split('T')[0] });
+  const [form, setForm] = useState({
+    type: 'mess', category: 'বাজার', amount: '', note: '',
+    date: now.toISOString().split('T')[0]
+  });
 
   const fetchExpenses = async () => {
     try {
@@ -51,17 +54,26 @@ export default function ExpensesPage() {
     <div>
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-bold text-gray-800">💰 Expenses</h2>
-          <p className="text-sm text-gray-500">এই মাসের মোট: <strong className="text-red-600">৳{total.toFixed(2)}</strong></p>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">💰 Expenses</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            এই মাসের মোট:{' '}
+            <strong className="text-red-600 dark:text-red-400">৳{total.toFixed(2)}</strong>
+          </p>
         </div>
-        <button onClick={() => setShowForm(!showForm)} className="btn-primary">+ খরচ যোগ</button>
+        <button onClick={() => setShowForm(!showForm)} className="btn-primary">
+          + খরচ যোগ
+        </button>
       </div>
 
       {/* Tab */}
       <div className="flex gap-2 mb-4">
         {['mess', 'personal'].map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'}`}>
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+              tab === t
+                ? 'bg-blue-600 text-white'
+                : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+            }`}>
             {t === 'mess' ? '🏠 Mess খরচ' : '👤 Personal খরচ'}
           </button>
         ))}
@@ -69,11 +81,14 @@ export default function ExpensesPage() {
 
       {showForm && (
         <div className="card mb-5">
-          <h3 className="font-semibold text-gray-700 mb-3">নতুন {tab === 'mess' ? 'Mess' : 'Personal'} খরচ</h3>
+          <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            নতুন {tab === 'mess' ? 'Mess' : 'Personal'} খরচ
+          </h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="label">ক্যাটাগরি</label>
-              <select className="input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+              <select className="input" value={form.category}
+                onChange={e => setForm({ ...form, category: e.target.value })}>
                 {categories.map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
@@ -94,35 +109,47 @@ export default function ExpensesPage() {
             </div>
             <div className="md:col-span-2 flex gap-2">
               <button type="submit" className="btn-success">✅ যোগ করুন</button>
-              <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 border rounded-lg text-gray-600">বাতিল</button>
+              <button type="button" onClick={() => setShowForm(false)}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+                বাতিল
+              </button>
             </div>
           </form>
         </div>
       )}
 
       <div className="card">
-        <div className="space-y-2">
+        <div className="space-y-1">
           {expenses.map(e => (
-            <div key={e._id} className="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0">
+            <div key={e._id}
+              className="flex items-center justify-between py-2.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-sm font-bold">
+                <div className="w-9 h-9 rounded-lg bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400 flex items-center justify-center text-sm font-bold">
                   ৳
                 </div>
                 <div>
-                  <p className="font-medium text-gray-800 text-sm">{e.category}</p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(e.date).toLocaleDateString('bn-BD')} {e.note ? `• ${e.note}` : ''}
+                  <p className="font-medium text-gray-800 dark:text-gray-100 text-sm">
+                    {e.category}
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-600">
+                    {new Date(e.date).toLocaleDateString('bn-BD')}
+                    {e.note ? ` • ${e.note}` : ''}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="font-bold text-gray-800">৳{e.amount}</span>
-                <button onClick={() => handleDelete(e._id)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
+                <span className="font-bold text-gray-800 dark:text-gray-100">৳{e.amount}</span>
+                <button onClick={() => handleDelete(e._id)}
+                  className="text-red-400 hover:text-red-600 dark:hover:text-red-400 text-sm p-1 rounded hover:bg-red-50 dark:hover:bg-red-950">
+                  ✕
+                </button>
               </div>
             </div>
           ))}
           {expenses.length === 0 && (
-            <div className="text-center py-8 text-gray-400">এই মাসে কোনো খরচ নেই</div>
+            <div className="text-center py-8 text-gray-400 dark:text-gray-600">
+              এই মাসে কোনো খরচ নেই
+            </div>
           )}
         </div>
       </div>

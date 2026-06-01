@@ -24,7 +24,8 @@ export default function MealsPage() {
     } catch {}
   };
 
-  const getMeal = (memberId) => meals[memberId] || { breakfast: false, lunch: false, dinner: false, guestMeals: 0 };
+  const getMeal = (memberId) =>
+    meals[memberId] || { breakfast: false, lunch: false, dinner: false, guestMeals: 0 };
 
   const toggle = async (memberId, field) => {
     const current = getMeal(memberId);
@@ -48,8 +49,12 @@ export default function MealsPage() {
     <div>
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-bold text-gray-800">🍛 Meal Tracking</h2>
-          <p className="text-sm text-gray-500">আজকের মোট মিল: <strong>{grandTotal}টি</strong></p>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+            🍛 Meal Tracking
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            আজকের মোট মিল: <strong>{grandTotal}টি</strong>
+          </p>
         </div>
         <input type="date" value={date} onChange={e => setDate(e.target.value)}
           className="input w-auto" />
@@ -58,25 +63,27 @@ export default function MealsPage() {
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left py-3 px-2 text-gray-600 font-medium">নাম</th>
-              <th className="text-center py-3 px-2 text-gray-600 font-medium">☀️ সকাল</th>
-              <th className="text-center py-3 px-2 text-gray-600 font-medium">🌤️ দুপুর</th>
-              <th className="text-center py-3 px-2 text-gray-600 font-medium">🌙 রাত</th>
-              <th className="text-center py-3 px-2 text-gray-600 font-medium">মোট</th>
+            <tr className="table-header">
+              <th className="text-left py-3 px-2 text-gray-600 dark:text-gray-400 font-medium">নাম</th>
+              <th className="text-center py-3 px-2 text-gray-600 dark:text-gray-400 font-medium">☀️ সকাল</th>
+              <th className="text-center py-3 px-2 text-gray-600 dark:text-gray-400 font-medium">🌤️ দুপুর</th>
+              <th className="text-center py-3 px-2 text-gray-600 dark:text-gray-400 font-medium">🌙 রাত</th>
+              <th className="text-center py-3 px-2 text-gray-600 dark:text-gray-400 font-medium">মোট</th>
             </tr>
           </thead>
           <tbody>
             {members.map(member => {
               const m = getMeal(member._id);
               return (
-                <tr key={member._id} className="border-b border-gray-50 hover:bg-gray-50">
+                <tr key={member._id} className="table-row">
                   <td className="py-3 px-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-xs font-bold flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center justify-center">
                         {member.name.charAt(0)}
                       </div>
-                      <span className="font-medium text-gray-800">{member.name}</span>
+                      <span className="font-medium text-gray-800 dark:text-gray-100">
+                        {member.name}
+                      </span>
                     </div>
                   </td>
                   {['breakfast', 'lunch', 'dinner'].map(field => (
@@ -84,15 +91,17 @@ export default function MealsPage() {
                       <button
                         onClick={() => toggle(member._id, field)}
                         disabled={saving === member._id + field}
-                        className={`w-8 h-8 rounded-full text-sm transition font-bold ${
-                          m[field] ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                        className={`w-9 h-9 rounded-full text-sm transition-all font-bold ${
+                          m[field]
+                            ? 'bg-green-500 dark:bg-green-600 text-white shadow-sm'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}>
                         {m[field] ? '✓' : '○'}
                       </button>
                     </td>
                   ))}
                   <td className="text-center py-3 px-2">
-                    <span className="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full text-xs">
+                    <span className="badge-blue px-2 py-0.5 rounded-full text-xs font-bold">
                       {totalMealsForMember(member._id)}
                     </span>
                   </td>
@@ -102,7 +111,9 @@ export default function MealsPage() {
           </tbody>
         </table>
         {members.length === 0 && (
-          <div className="text-center py-8 text-gray-400">প্রথমে Members পেজে member যোগ করুন</div>
+          <div className="text-center py-8 text-gray-400 dark:text-gray-600">
+            প্রথমে Members পেজে member যোগ করুন
+          </div>
         )}
       </div>
     </div>
