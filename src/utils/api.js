@@ -35,4 +35,7 @@ export const createIncome       = (data)   => api.post('/income', data);
 export const deleteIncome       = (id)     => api.delete(`/income/${id}`);
 export const getIncomeSummary   = (month)  => api.get(`/income/summary/${month}`);
 
+//settlement
+export const getSettlement = (y, m) => api.get(`/settlement/${y}/${m}`);
+
 export default api;
