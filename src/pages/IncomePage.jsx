@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getIncomes, createIncome, deleteIncome, getIncomeSummary } from '../utils/api';
+import { exportIncomeToExcel } from '../utils/exportExcel';
 import toast from 'react-hot-toast';
 
 const SOURCES = ['বাবার কাছ থেকে', 'টিউশনি', 'চাকরি', 'ফ্রিল্যান্সিং', 'বৃত্তি', 'অন্যান্য'];
@@ -64,9 +65,13 @@ export default function IncomePage() {
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">💰 Income Tracking</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">আয় ও সঞ্চয় হিসাব</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <input type="month" value={month} onChange={e => setMonth(e.target.value)}
             className="input w-auto" />
+          <button onClick={() => exportIncomeToExcel(incomes, month)}
+            className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-lg text-sm font-medium hover:bg-emerald-100 dark:hover:bg-emerald-900 transition">
+            📊 Excel
+          </button>
           <button onClick={() => setShowForm(!showForm)} className="btn-primary">
             + আয় যোগ
           </button>
@@ -77,9 +82,9 @@ export default function IncomePage() {
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           {[
-            { label: 'মোট আয়',   value: `৳${summary.totalIncome}`,  color: 'green',  icon: '📈' },
-            { label: 'মোট খরচ',  value: `৳${summary.totalExpense}`, color: 'red',    icon: '📉' },
-            { label: 'সঞ্চয়',    value: `৳${Math.abs(summary.savings)}`, color: summary.savings >= 0 ? 'green' : 'red', icon: '🏦' },
+            { label: 'মোট আয়',    value: `৳${summary.totalIncome}`,  color: 'green',  icon: '📈' },
+            { label: 'মোট খরচ',   value: `৳${summary.totalExpense}`, color: 'red',    icon: '📉' },
+            { label: 'সঞ্চয়',     value: `৳${Math.abs(summary.savings)}`, color: summary.savings >= 0 ? 'green' : 'red', icon: '🏦' },
             { label: 'সঞ্চয় হার', value: `${summary.savingsRate}%`,  color: summary.savingsRate >= 0 ? 'blue' : 'red', icon: '📊' },
           ].map(s => (
             <div key={s.label}
@@ -134,7 +139,9 @@ export default function IncomePage() {
       {/* Add Form */}
       {showForm && (
         <div className="card mb-5">
-          <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">নতুন আয় যোগ করুন</h3>
+          <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            নতুন আয় যোগ করুন
+          </h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="label">উৎস</label>
@@ -191,7 +198,9 @@ export default function IncomePage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="font-bold text-green-600 dark:text-green-400">৳{inc.amount}</span>
+                <span className="font-bold text-green-600 dark:text-green-400">
+                  ৳{inc.amount}
+                </span>
                 <button onClick={() => handleDelete(inc._id)}
                   className="text-red-400 hover:text-red-600 text-sm p-1 rounded hover:bg-red-50 dark:hover:bg-red-950">
                   ✕

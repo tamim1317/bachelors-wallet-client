@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import { getExpenses, createExpense, deleteExpense } from '../utils/api';
 import toast from 'react-hot-toast';
+import { exportExpensesToExcel } from '../utils/exportExcel';
+
+<div className="flex items-center gap-2">
+  <button onClick={() => exportExpensesToExcel(expenses, `${now.getFullYear()}-${now.getMonth()+1}`)}
+    className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-lg text-sm font-medium hover:bg-emerald-100 transition">
+    📊 Excel
+  </button>
+  <button onClick={() => setShowForm(!showForm)} className="btn-primary">
+    + খরচ যোগ
+  </button>
+</div>
 
 const MESS_CATEGORIES     = ['বাজার', 'গ্যাস', 'বিদ্যুৎ', 'পানি', 'অন্যান্য'];
 const PERSONAL_CATEGORIES = ['রুম ভাড়া', 'বাইরে খাওয়া', 'ট্রান্সপোর্ট', 'মোবাইল রিচার্জ', 'পড়াশোনা', 'শপিং', 'অন্যান্য'];

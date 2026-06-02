@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { generateBill, markAsPaid } from '../utils/api';
 import toast from 'react-hot-toast';
 import { generateBillPDF } from '../utils/generatePDF';
+import { exportBillToExcel } from '../utils/exportExcel';
 
 const now = new Date();
 const months = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন',
@@ -28,6 +29,12 @@ export default function BillsPage() {
     generateBillPDF(result);
     toast.success('PDF download হচ্ছে! ✅');
   };
+
+  const handleDownloadExcel = () => {
+  if (!result) return toast.error('আগে Bill তৈরি করুন');
+  exportBillToExcel(result);
+  toast.success('Excel download হচ্ছে! ✅');
+};
 
   const handlePay = async (billId, name) => {
     try {
@@ -104,6 +111,12 @@ export default function BillsPage() {
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900 transition font-medium">
                 📄 PDF
               </button>
+              {result && (
+  <button onClick={handleDownloadExcel}
+    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition">
+    📊 Excel Download
+  </button>
+)}
             </div>
             <table className="w-full text-sm">
               <thead>
