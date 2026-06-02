@@ -42,9 +42,16 @@ export const getMesses     = ()         => api.get('/mess');
 export const createMess    = (data)     => api.post('/mess', data);
 export const updateMess    = (id, data) => api.put(`/mess/${id}`, data);
 export const deleteMess    = (id)       => api.delete(`/mess/${id}`);
+
 // Budget
 export const getBudget       = (month) => api.get(`/budget/${month}`);
 export const setBudget       = (month, data) => api.post(`/budget/${month}`, data);
 export const getBudgetStatus = (month) => api.get(`/budget/status/${month}`);
+
+// Notices
+export const getNotices    = ()     => api.get('/notices');
+export const createNotice  = (data) => api.post('/notices', data);
+export const togglePin     = (id)   => api.patch(`/notices/${id}/pin`);
+export const deleteNotice  = (id)   => api.delete(`/notices/${id}`);
 
 export default api;
