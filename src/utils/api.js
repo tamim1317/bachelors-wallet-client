@@ -54,4 +54,13 @@ export const createNotice  = (data) => api.post('/notices', data);
 export const togglePin     = (id)   => api.patch(`/notices/${id}/pin`);
 export const deleteNotice  = (id)   => api.delete(`/notices/${id}`);
 
+// Rooms
+export const getRooms       = ()           => api.get('/rooms');
+export const getRoomStats   = ()           => api.get('/rooms/stats');
+export const createRoom     = (data)       => api.post('/rooms', data);
+export const updateRoom     = (id, data)   => api.put(`/rooms/${id}`, data);
+export const deleteRoom     = (id)         => api.delete(`/rooms/${id}`);
+export const assignMember   = (id, data)   => api.post(`/rooms/${id}/assign`, data);
+export const removeMember   = (id, data)   => api.post(`/rooms/${id}/remove-member`, data);
+
 export default api;
