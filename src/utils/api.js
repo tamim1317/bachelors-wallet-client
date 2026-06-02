@@ -37,5 +37,10 @@ export const getIncomeSummary   = (month)  => api.get(`/income/summary/${month}`
 
 //settlement
 export const getSettlement = (y, m) => api.get(`/settlement/${y}/${m}`);
+// Mess
+export const getMesses     = ()         => api.get('/mess');
+export const createMess    = (data)     => api.post('/mess', data);
+export const updateMess    = (id, data) => api.put(`/mess/${id}`, data);
+export const deleteMess    = (id)       => api.delete(`/mess/${id}`);
 
 export default api;

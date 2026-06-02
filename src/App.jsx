@@ -8,6 +8,7 @@ import ExpensesPage  from './pages/ExpensesPage';
 import BillsPage     from './pages/BillsPage';
 import IncomePage from './pages/IncomePage';
 import SettlementPage from './pages/SettlementPage';
+import MessPage from './pages/MessPage';
 
 const navItems = [
   { to: '/',         icon: '📊', label: 'Dashboard' },
@@ -17,6 +18,7 @@ const navItems = [
   { to: '/bills',    icon: '🧾', label: 'Bills' },
   { to: '/income', icon: '💵', label: 'Income' },
   { to: '/settlement', icon: '🤝', label: 'Settlement' },
+  { to: '/mess', icon: '🏠', label: 'Mess' },
 ];
 
 function DarkToggle() {
@@ -88,6 +90,7 @@ export default function App() {
               <Route path="/bills"    element={<BillsPage />} />
               <Route path="/income" element={<IncomePage />} />
               <Route path="/settlement" element={<SettlementPage />} />
+              <Route path="/mess" element={<MessPage />} />
             </Routes>
           </div>
         </main>
