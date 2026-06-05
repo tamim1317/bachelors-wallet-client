@@ -63,4 +63,7 @@ export const deleteRoom     = (id)         => api.delete(`/rooms/${id}`);
 export const assignMember   = (id, data)   => api.post(`/rooms/${id}/assign`, data);
 export const removeMember   = (id, data)   => api.post(`/rooms/${id}/remove-member`, data);
 
+// Prediction
+export const getPrediction = () => api.get('/prediction');
+
 export default api;

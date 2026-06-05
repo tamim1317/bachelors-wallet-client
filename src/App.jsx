@@ -12,6 +12,7 @@ import MessPage from './pages/MessPage';
 import BudgetPage from './pages/BudgetPage';
 import NoticePage from './pages/NoticePage';
 import RoomPage from './pages/RoomPage';
+import PredictionPage from './pages/PredictionPage';
 
 const navItems = [
   { to: '/',         icon: '📊', label: 'Dashboard' },
@@ -25,6 +26,7 @@ const navItems = [
   { to: '/budget', icon: '🎯', label: 'Budget' },
   { to: '/notices', icon: '📌', label: 'Notice' },
   { to: '/rooms', icon: '🚪', label: 'Rooms' },
+  { to: '/prediction', icon: '🤖', label: 'AI Predict' },
 ];
 
 function DarkToggle() {
@@ -100,6 +102,7 @@ export default function App() {
               <Route path="/budget" element={<BudgetPage />} />
               <Route path="/notices" element={<NoticePage />} />
               <Route path="/rooms" element={<RoomPage />} />
+              <Route path="/prediction" element={<PredictionPage />} />
             </Routes>
           </div>
         </main>
