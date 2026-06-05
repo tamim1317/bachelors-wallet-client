@@ -1,36 +1,14 @@
 import { useState, useEffect } from 'react';
-import { getMembers, getExpenses, getMonthlySummary } from '../utils/api';
-import { getIncomeSummary } from '../utils/api';
-import { requestNotificationPermission, setMealReminder } from '../utils/pwa';
-import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, Tooltip, ResponsiveContainer, Legend
-} from 'recharts';
+import { getMembers, getExpenses, getMonthlySummary, getIncomeSummary } from '../utils/api';
+import { Users, TrendingUp, TrendingDown, UtensilsCrossed, PiggyBank, ShoppingCart, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 
 const now = new Date();
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+const COLORS = ['#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
 const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-
-{/* Notification Button */}
-<div className="mb-5">
-  <button
-    onClick={async () => {
-      const granted = await requestNotificationPermission();
-      if (granted) {
-        setMealReminder();
-        toast.success('🔔 Notification চালু হয়েছে! রাত ৯টায় reminder পাবে।');
-      } else {
-        toast.error('Notification permission দিন');
-      }
-    }}
-    className="flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800 rounded-lg text-sm font-medium hover:bg-purple-100 dark:hover:bg-purple-900 transition">
-    🔔 Daily Meal Reminder চালু করো
-  </button>
-</div>
-
-// Animated counter hook
-function useCounter(target, duration = 1000) {
+function useCounter(target, duration = 800) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     if (!target) return;
@@ -46,26 +24,28 @@ function useCounter(target, duration = 1000) {
   return count;
 }
 
-function StatCard({ icon, label, value, sub, color }) {
-  const animated = useCounter(parseFloat(value) || 0);
-  const colorMap = {
-    blue:   'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300',
-    green:  'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300',
-    red:    'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300',
-    purple: 'bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300',
-    orange: 'bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-300',
-  };
+function StatCard({ icon: Icon, label, value, sub, color, trend, bg }) {
+  const numVal = parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
+  const animated = useCounter(numVal);
+  const prefix = String(value).startsWith('৳') ? '৳' : '';
+  const suffix = String(value).endsWith('জন') ? 'জন' : String(value).endsWith('টি') ? 'টি' : '';
+
   return (
-    <div className="card flex items-start gap-4">
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${colorMap[color]}`}>
-        {icon}
+    <div className="card flex items-start gap-4 hover:shadow-md transition-all duration-200">
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${bg}`}>
+        <Icon size={22} className={color} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{label}</p>
-        <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-          {typeof value === 'number' ? `৳${animated.toLocaleString()}` : value}
+        <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{label}</p>
+        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          {prefix}{animated.toLocaleString()}{suffix}
         </p>
-        {sub && <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">{sub}</p>}
+        {sub && (
+          <p className={`text-xs mt-1 flex items-center gap-1 ${trend === 'up' ? 'text-red-500' : trend === 'down' ? 'text-emerald-500' : 'text-gray-400'}`}>
+            {trend === 'up' ? <ArrowUpRight size={12} /> : trend === 'down' ? <ArrowDownRight size={12} /> : null}
+            {sub}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -74,11 +54,13 @@ function StatCard({ icon, label, value, sub, color }) {
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3 shadow-lg text-sm">
-      <p className="font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</p>
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 shadow-xl text-sm">
+      <p className="font-semibold text-gray-700 dark:text-gray-300 mb-2">{label}</p>
       {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color }}>
-          {p.name}: ৳{p.value?.toLocaleString()}
+        <p key={i} className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+          <span className="text-gray-600 dark:text-gray-400">{p.name}:</span>
+          <span className="font-semibold text-gray-900 dark:text-white">৳{p.value?.toLocaleString()}</span>
         </p>
       ))}
     </div>
@@ -86,16 +68,15 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function DashboardPage() {
-  const [stats, setStats]             = useState({ members: 0, messTotal: 0, personalTotal: 0, totalMeals: 0, income: 0, savings: 0 });
-  const [messBreakdown, setMessBreakdown]         = useState([]);
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({ members: 0, messTotal: 0, personalTotal: 0, totalMeals: 0, income: 0, savings: 0 });
+  const [messBreakdown, setMessBreakdown]     = useState([]);
   const [personalBreakdown, setPersonalBreakdown] = useState([]);
-  const [trend, setTrend]             = useState([]);
-  const [loading, setLoading]         = useState(true);
+  const [trend, setTrend]   = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const y = now.getFullYear();
-    const m = now.getMonth() + 1;
-
+    const y = now.getFullYear(), m = now.getMonth() + 1;
     Promise.all([
       getMembers(),
       getExpenses({ type: 'mess',     month: m, year: y }),
@@ -105,7 +86,6 @@ export default function DashboardPage() {
     ]).then(([mem, mess, personal, meals, income]) => {
       const totalIncome  = income.data.data.totalIncome  || 0;
       const totalExpense = income.data.data.totalExpense || 0;
-
       setStats({
         members:      mem.data.data.length,
         messTotal:    mess.data.total,
@@ -114,155 +94,127 @@ export default function DashboardPage() {
         income:       totalIncome,
         savings:      totalIncome - totalExpense,
       });
-
-      // Mess pie chart
       const catMap = {};
-      mess.data.data.forEach(e => {
-        catMap[e.category] = (catMap[e.category] || 0) + e.amount;
-      });
+      mess.data.data.forEach(e => { catMap[e.category] = (catMap[e.category] || 0) + e.amount; });
       setMessBreakdown(Object.entries(catMap).map(([name, value]) => ({ name, value })));
-
-      // Personal bar chart
       const pMap = {};
-      personal.data.data.forEach(e => {
-        pMap[e.category] = (pMap[e.category] || 0) + e.amount;
-      });
+      personal.data.data.forEach(e => { pMap[e.category] = (pMap[e.category] || 0) + e.amount; });
       setPersonalBreakdown(Object.entries(pMap).map(([name, value]) => ({ name, value })));
-
-      // Last 6 months trend
       const months = [];
       for (let i = 5; i >= 0; i--) {
         const d = new Date(y, m - 1 - i, 1);
-        months.push({
-          name: d.toLocaleString('default', { month: 'short' }),
-          খরচ: Math.floor(Math.random() * 8000) + 4000, // placeholder
-          আয়: Math.floor(Math.random() * 5000) + 8000,  // placeholder
-        });
+        months.push({ name: d.toLocaleString('default', { month: 'short' }), খরচ: Math.floor(Math.random() * 8000) + 4000, আয়: Math.floor(Math.random() * 5000) + 8000 });
       }
-      // last month real data
-      if (months.length > 0) {
-        months[months.length - 1].খরচ = totalExpense;
-        months[months.length - 1].আয়  = totalIncome;
-      }
+      if (months.length > 0) { months[months.length-1].খরচ = totalExpense; months[months.length-1].আয় = totalIncome; }
       setTrend(months);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center text-gray-400 dark:text-gray-600">
-          <div className="text-4xl mb-3 animate-pulse">📊</div>
-          <p>Dashboard লোড হচ্ছে...</p>
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mx-auto mb-3 animate-pulse">
+          <ShoppingCart size={22} className="text-indigo-500" />
         </div>
+        <p className="text-sm text-gray-400">লোড হচ্ছে...</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  const statCards = [
-    { icon: '👥', label: 'সক্রিয় সদস্য',    value: `${stats.members}জন`,   sub: 'এই মেসে',           color: 'blue' },
-    { icon: '💰', label: 'মোট আয়',           value: stats.income,           sub: 'এই মাসে',           color: 'green' },
-    { icon: '🏠', label: 'Mess খরচ',          value: stats.messTotal,        sub: 'বাজার + utility',   color: 'orange' },
-    { icon: '💳', label: 'Personal খরচ',      value: stats.personalTotal,    sub: 'রুম + transport...',color: 'purple' },
-    { icon: '🍛', label: 'মোট মিল',           value: `${stats.totalMeals}টি`,sub: 'এই মাসে',           color: 'blue' },
-    { icon: '🏦', label: 'সঞ্চয়',            value: stats.savings,          sub: stats.savings >= 0 ? '✅ সাশ্রয়' : '⚠️ ঘাটতি', color: stats.savings >= 0 ? 'green' : 'red' },
+  const spentPct = stats.income > 0 ? Math.min(((stats.messTotal + stats.personalTotal) / stats.income) * 100, 100) : 0;
+
+  const quickActions = [
+    { icon: UtensilsCrossed, label: 'Meal Entry',  path: '/meals',    color: 'text-amber-600',   bg: 'bg-amber-50 dark:bg-amber-900/20' },
+    { icon: ShoppingCart,    label: 'খরচ যোগ',    path: '/expenses', color: 'text-rose-600',    bg: 'bg-rose-50 dark:bg-rose-900/20' },
+    { icon: TrendingUp,      label: 'আয় যোগ',     path: '/income',   color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+    { icon: PiggyBank,       label: 'Bill তৈরি',   path: '/bills',    color: 'text-indigo-600',  bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
   ];
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">📊 Dashboard</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {now.toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
+      <div className="page-header">
+        <h1 className="page-title">Dashboard</h1>
+        <p className="page-sub">{now.toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {statCards.map(s => <StatCard key={s.label} {...s} />)}
+        <StatCard icon={Users}        label="সক্রিয় সদস্য"  value={`${stats.members}জন`}      sub="এই মেসে"          color="text-indigo-600 dark:text-indigo-400"  bg="bg-indigo-50 dark:bg-indigo-900/20" />
+        <StatCard icon={TrendingUp}   label="মোট আয়"        value={`৳${stats.income}`}         sub="এই মাসে"          color="text-emerald-600 dark:text-emerald-400" bg="bg-emerald-50 dark:bg-emerald-900/20" />
+        <StatCard icon={ShoppingCart} label="Mess খরচ"       value={`৳${stats.messTotal}`}      sub="বাজার + utility"  color="text-amber-600 dark:text-amber-400"    bg="bg-amber-50 dark:bg-amber-900/20" trend="up" />
+        <StatCard icon={TrendingDown} label="Personal খরচ"   value={`৳${stats.personalTotal}`}  sub="রুম + transport"  color="text-rose-600 dark:text-rose-400"      bg="bg-rose-50 dark:bg-rose-900/20" trend="up" />
+        <StatCard icon={UtensilsCrossed} label="মোট মিল"     value={`${stats.totalMeals}টি`}    sub="এই মাসে"          color="text-blue-600 dark:text-blue-400"      bg="bg-blue-50 dark:bg-blue-900/20" />
+        <StatCard icon={PiggyBank}    label="সঞ্চয়"          value={`৳${Math.abs(stats.savings)}`} sub={stats.savings >= 0 ? 'সাশ্রয় হয়েছে' : 'ঘাটতি আছে'} color={stats.savings >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'} bg={stats.savings >= 0 ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-red-50 dark:bg-red-900/20'} trend={stats.savings >= 0 ? 'down' : 'up'} />
       </div>
 
-      {/* Income vs Expense Progress */}
+      {/* Income vs Expense Bar */}
       {stats.income > 0 && (
         <div className="card mb-6">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-700 dark:text-gray-300">আয় vs খরচ</h3>
-            <span className={`text-sm font-medium ${stats.savings >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">আয় vs খরচ</p>
+            <span className={`text-sm font-semibold ${stats.savings >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
               {stats.savings >= 0 ? `৳${stats.savings} সঞ্চয়` : `৳${Math.abs(stats.savings)} ঘাটতি`}
             </span>
           </div>
-          <div className="relative w-full bg-gray-100 dark:bg-gray-800 rounded-full h-4 overflow-hidden">
-            <div
-              className={`h-4 rounded-full transition-all duration-1000 ${
-                stats.messTotal + stats.personalTotal > stats.income ? 'bg-red-500' : 'bg-green-500'
-              }`}
-              style={{ width: `${Math.min(((stats.messTotal + stats.personalTotal) / stats.income) * 100, 100)}%` }}
-            />
+          <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-3 overflow-hidden">
+            <div className={`h-3 rounded-full transition-all duration-1000 ${spentPct >= 100 ? 'bg-red-500' : spentPct >= 80 ? 'bg-orange-500' : 'bg-emerald-500'}`}
+              style={{ width: `${spentPct}%` }} />
           </div>
-          <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
-            <span>মোট খরচ: ৳{(stats.messTotal + stats.personalTotal).toLocaleString()}</span>
-            <span>মোট আয়: ৳{stats.income.toLocaleString()}</span>
+          <div className="flex justify-between mt-2 text-xs text-gray-400">
+            <span>খরচ ৳{(stats.messTotal + stats.personalTotal).toLocaleString()}</span>
+            <span>{spentPct.toFixed(0)}%</span>
+            <span>আয় ৳{stats.income.toLocaleString()}</span>
           </div>
         </div>
       )}
 
-      {/* Charts Row */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
-
-        {/* 6 Month Trend */}
         <div className="card">
-          <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">
-            📈 ৬ মাসের খরচের ধারা
-          </h3>
+          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">৬ মাসের ধারা</p>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={trend}>
               <defs>
-                <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#ef4444" stopOpacity={0.3} />
+                <linearGradient id="expG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor="#ef4444" stopOpacity={0.15} />
                   <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                 </linearGradient>
-                <linearGradient id="incGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#10b981" stopOpacity={0.3} />
+                <linearGradient id="incG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor="#10b981" stopOpacity={0.15} />
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9ca3af' }} />
-              <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Area type="monotone" dataKey="আয়"  stroke="#10b981" fill="url(#incGrad)" strokeWidth={2} />
-              <Area type="monotone" dataKey="খরচ" stroke="#ef4444" fill="url(#expGrad)" strokeWidth={2} />
+              <Area type="monotone" dataKey="আয়"  stroke="#10b981" fill="url(#incG)" strokeWidth={2.5} dot={false} />
+              <Area type="monotone" dataKey="খরচ" stroke="#ef4444" fill="url(#expG)" strokeWidth={2.5} dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Mess Breakdown Pie */}
         {messBreakdown.length > 0 ? (
           <div className="card">
-            <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">
-              🏠 Mess খরচের ভাগ
-            </h3>
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Mess খরচের ভাগ</p>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie data={messBreakdown} dataKey="value" nameKey="name"
-                  cx="50%" cy="50%" outerRadius={75} innerRadius={35}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}>
-                  {messBreakdown.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
+                  cx="50%" cy="50%" outerRadius={80} innerRadius={45}
+                  strokeWidth={2} stroke="transparent">
+                  {messBreakdown.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip formatter={v => `৳${v}`} />
+                <Legend iconType="circle" iconSize={8} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="card flex items-center justify-center text-gray-400 dark:text-gray-600 h-48">
-            <div className="text-center">
-              <p className="text-3xl mb-2">🏠</p>
-              <p className="text-sm">Mess খরচ যোগ করলে এখানে chart দেখাবে</p>
+          <div className="card flex items-center justify-center">
+            <div className="text-center text-gray-400 dark:text-gray-600">
+              <ShoppingCart size={32} className="mx-auto mb-2 opacity-40" />
+              <p className="text-sm">Mess খরচ যোগ করলে chart দেখাবে</p>
             </div>
           </div>
         )}
@@ -271,18 +223,14 @@ export default function DashboardPage() {
       {/* Personal Expense Bar */}
       {personalBreakdown.length > 0 && (
         <div className="card mb-6">
-          <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">
-            💳 Personal খরচের বিভাগ
-          </h3>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={personalBreakdown} barSize={36}>
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9ca3af' }} />
-              <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} />
+          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Personal খরচের বিভাগ</p>
+          <ResponsiveContainer width="100%" height={170}>
+            <BarChart data={personalBreakdown} barSize={32}>
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="value" name="খরচ" radius={[6, 6, 0, 0]}>
-                {personalBreakdown.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
+              <Bar dataKey="value" name="খরচ" radius={[8, 8, 0, 0]}>
+                {personalBreakdown.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -291,21 +239,18 @@ export default function DashboardPage() {
 
       {/* Quick Actions */}
       <div className="card">
-        <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">⚡ Quick Actions</h3>
+        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Quick Actions</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { icon: '🍛', label: 'Meal Entry',   path: '/meals' },
-            { icon: '💰', label: 'খরচ যোগ',     path: '/expenses' },
-            { icon: '💵', label: 'আয় যোগ',      path: '/income' },
-            { icon: '🧾', label: 'Bill তৈরি',    path: '/bills' },
-          ].map(a => (
-            <a key={a.label} href={a.path}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950 transition group">
-              <span className="text-2xl">{a.icon}</span>
-              <span className="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+          {quickActions.map(a => (
+            <button key={a.label} onClick={() => navigate(a.path)}
+              className="flex flex-col items-center gap-2.5 p-4 rounded-2xl hover:shadow-sm transition-all duration-200 group border border-transparent hover:border-gray-100 dark:hover:border-gray-800">
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 ${a.bg}`}>
+                <a.icon size={20} className={a.color} />
+              </div>
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                 {a.label}
               </span>
-            </a>
+            </button>
           ))}
         </div>
       </div>

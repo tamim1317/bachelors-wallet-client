@@ -1,43 +1,48 @@
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useTheme } from './context/ThemeContext';
-import DashboardPage from './pages/DashboardPage';
-import MembersPage   from './pages/MembersPage';
-import MealsPage     from './pages/MealsPage';
-import ExpensesPage  from './pages/ExpensesPage';
-import BillsPage     from './pages/BillsPage';
-import IncomePage from './pages/IncomePage';
+import {
+  LayoutDashboard, Users, UtensilsCrossed, Wallet,
+  Receipt, TrendingUp, Handshake, Target, Bell,
+  DoorOpen, Bot, Sun, Moon, ChevronRight
+} from 'lucide-react';
+
+import DashboardPage  from './pages/DashboardPage';
+import MembersPage    from './pages/MembersPage';
+import MealsPage      from './pages/MealsPage';
+import ExpensesPage   from './pages/ExpensesPage';
+import BillsPage      from './pages/BillsPage';
+import IncomePage     from './pages/IncomePage';
 import SettlementPage from './pages/SettlementPage';
-import MessPage from './pages/MessPage';
-import BudgetPage from './pages/BudgetPage';
-import NoticePage from './pages/NoticePage';
-import RoomPage from './pages/RoomPage';
+import MessPage       from './pages/MessPage';
+import BudgetPage     from './pages/BudgetPage';
+import NoticePage     from './pages/NoticePage';
+import RoomPage       from './pages/RoomPage';
 import PredictionPage from './pages/PredictionPage';
 
 const navItems = [
-  { to: '/',         icon: '📊', label: 'Dashboard' },
-  { to: '/members',  icon: '👥', label: 'Members' },
-  { to: '/meals',    icon: '🍛', label: 'Meals' },
-  { to: '/expenses', icon: '💰', label: 'Expenses' },
-  { to: '/bills',    icon: '🧾', label: 'Bills' },
-  { to: '/income', icon: '💵', label: 'Income' },
-  { to: '/settlement', icon: '🤝', label: 'Settlement' },
-  { to: '/mess', icon: '🏠', label: 'Mess' },
-  { to: '/budget', icon: '🎯', label: 'Budget' },
-  { to: '/notices', icon: '📌', label: 'Notice' },
-  { to: '/rooms', icon: '🚪', label: 'Rooms' },
-  { to: '/prediction', icon: '🤖', label: 'AI Predict' },
+  { to: '/',          icon: LayoutDashboard,  label: 'Dashboard' },
+  { to: '/members',   icon: Users,            label: 'Members' },
+  { to: '/meals',     icon: UtensilsCrossed,  label: 'Meals' },
+  { to: '/expenses',  icon: Wallet,           label: 'Expenses' },
+  { to: '/income',    icon: TrendingUp,       label: 'Income' },
+  { to: '/bills',     icon: Receipt,          label: 'Bills' },
+  { to: '/settlement',icon: Handshake,        label: 'Settlement' },
+  { to: '/budget',    icon: Target,           label: 'Budget' },
+  { to: '/notices',   icon: Bell,             label: 'Notice' },
+  { to: '/mess',      icon: DoorOpen,         label: 'Mess' },
+  { to: '/rooms',     icon: DoorOpen,         label: 'Rooms' },
+  { to: '/prediction',icon: Bot,              label: 'AI Predict' },
 ];
 
 function DarkToggle() {
   const { dark, toggle } = useTheme();
   return (
     <button onClick={toggle}
-      className="w-9 h-9 rounded-lg flex items-center justify-center
-                 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700
-                 text-gray-600 dark:text-gray-300 transition-all duration-300"
-      title={dark ? 'Light mode' : 'Dark mode'}>
-      {dark ? '☀️' : '🌙'}
+      className="w-8 h-8 rounded-lg flex items-center justify-center
+                 hover:bg-gray-100 dark:hover:bg-gray-800
+                 text-gray-500 dark:text-gray-400 transition-all">
+      {dark ? <Sun size={16} /> : <Moon size={16} />}
     </button>
   );
 }
@@ -45,81 +50,107 @@ function DarkToggle() {
 export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Toaster position="top-right"
-        toastOptions={{
-          style: { background: 'var(--toast-bg)', color: 'var(--toast-text)' }
-        }} />
-      <div className="min-h-screen flex bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+      <Toaster position="top-right" toastOptions={{
+        style: { borderRadius: '12px', fontSize: '14px' },
+        success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
+      }} />
 
-        {/* Sidebar */}
-        <aside className="w-56 sidebar-bg fixed h-full hidden md:flex flex-col">
-          <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-bold text-blue-700 dark:text-blue-400">
-                💰 Bachelor's Wallet
-              </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">Finance Manager</p>
+      <div className="min-h-screen flex bg-slate-50 dark:bg-[#0F1117]">
+
+        {/* ── Sidebar ── */}
+        <aside className="w-60 bg-white dark:bg-[#13151F] border-r border-gray-100 dark:border-gray-800/60 fixed h-full hidden md:flex flex-col">
+
+          {/* Logo */}
+          <div className="px-5 py-5 border-b border-gray-100 dark:border-gray-800/60">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center">
+                  <Wallet size={16} className="text-white" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm text-gray-900 dark:text-white">Bachelor's Wallet</p>
+                  <p className="text-xs text-gray-400">Finance Manager</p>
+                </div>
+              </div>
+              <DarkToggle />
             </div>
-            <DarkToggle />
           </div>
-          <nav className="p-3 flex flex-col gap-1 flex-1">
+
+          {/* Nav */}
+          <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-0.5">
             {navItems.map(item => (
               <NavLink key={item.to} to={item.to} end={item.to === '/'}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
-                    isActive ? 'nav-active' : 'nav-inactive'
-                  }`
+                  `nav-link ${isActive ? 'nav-active' : 'nav-inactive'}`
                 }>
-                <span>{item.icon}</span> {item.label}
+                {({ isActive }) => (
+                  <>
+                    <item.icon size={17} className={isActive ? 'text-indigo-600 dark:text-indigo-400' : ''} />
+                    <span className="flex-1">{item.label}</span>
+                    {isActive && <ChevronRight size={14} className="text-indigo-400" />}
+                  </>
+                )}
               </NavLink>
             ))}
           </nav>
-          <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+
+          {/* Footer */}
+          <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800/60">
             <p className="text-xs text-gray-400 dark:text-gray-600 text-center">
               Bachelor's Wallet v2.0
             </p>
           </div>
         </aside>
 
-        {/* Main */}
-        <main className="flex-1 md:ml-56">
+        {/* ── Main ── */}
+        <main className="flex-1 md:ml-60">
+
           {/* Mobile topbar */}
-          <div className="md:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-            <span className="text-blue-700 dark:text-blue-400 font-bold">💰 Bachelor's Wallet</span>
+          <div className="md:hidden sticky top-0 z-40 bg-white/80 dark:bg-[#13151F]/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800/60 px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
+                <Wallet size={14} className="text-white" />
+              </div>
+              <span className="font-bold text-sm text-gray-900 dark:text-white">Bachelor's Wallet</span>
+            </div>
             <DarkToggle />
           </div>
 
-          <div className="p-4 md:p-6 pb-24 md:pb-6">
+          <div className="p-4 md:p-6 pb-24 md:pb-8">
             <Routes>
-              <Route path="/"         element={<DashboardPage />} />
-              <Route path="/members"  element={<MembersPage />} />
-              <Route path="/meals"    element={<MealsPage />} />
-              <Route path="/expenses" element={<ExpensesPage />} />
-              <Route path="/bills"    element={<BillsPage />} />
-              <Route path="/income" element={<IncomePage />} />
-              <Route path="/settlement" element={<SettlementPage />} />
-              <Route path="/mess" element={<MessPage />} />
-              <Route path="/budget" element={<BudgetPage />} />
-              <Route path="/notices" element={<NoticePage />} />
-              <Route path="/rooms" element={<RoomPage />} />
-              <Route path="/prediction" element={<PredictionPage />} />
+              <Route path="/"          element={<DashboardPage />} />
+              <Route path="/members"   element={<MembersPage />} />
+              <Route path="/meals"     element={<MealsPage />} />
+              <Route path="/expenses"  element={<ExpensesPage />} />
+              <Route path="/income"    element={<IncomePage />} />
+              <Route path="/bills"     element={<BillsPage />} />
+              <Route path="/settlement"element={<SettlementPage />} />
+              <Route path="/budget"    element={<BudgetPage />} />
+              <Route path="/notices"   element={<NoticePage />} />
+              <Route path="/mess"      element={<MessPage />} />
+              <Route path="/rooms"     element={<RoomPage />} />
+              <Route path="/prediction"element={<PredictionPage />} />
             </Routes>
           </div>
         </main>
 
-        {/* Mobile bottom nav */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex z-50">
-          {navItems.map(item => (
+        {/* ── Mobile bottom nav ── */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-[#13151F]/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800/60 flex z-50 px-2 py-1">
+          {navItems.slice(0, 5).map(item => (
             <NavLink key={item.to} to={item.to} end={item.to === '/'}
               className={({ isActive }) =>
-                `flex-1 flex flex-col items-center py-2 text-xs transition-all duration-200 ${
+                `flex-1 flex flex-col items-center py-1.5 rounded-xl text-xs transition-all ${
                   isActive
-                    ? 'text-blue-700 dark:text-blue-400 font-semibold'
-                    : 'text-gray-500 dark:text-gray-500'
+                    ? 'text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-400 dark:text-gray-600'
                 }`
               }>
-              <span className="text-lg">{item.icon}</span>
-              <span>{item.label}</span>
+              {({ isActive }) => (
+                <>
+                  <item.icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
+                  <span className="mt-0.5 font-medium">{item.label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
