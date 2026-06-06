@@ -1,6 +1,7 @@
 {
   "name": "bachelor-mess-frontend",
   "version": "1.0.0",
+   "type": "module",
   "private": true,
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

@@ -9,7 +9,18 @@
 
 @layer base {
   * { font-family: 'Inter', sans-serif; }
-  
+
+  /* Dark mode smooth transition */
+  html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+  }
+
   body {
     @apply bg-slate-50 dark:bg-[#0F1117] text-gray-900 dark:text-gray-100;
     font-feature-settings: "cv11", "ss01";
@@ -128,3 +139,4 @@
   .alert-success { @apply p-3.5 rounded-xl border bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300 text-sm; }
   .alert-info    { @apply p-3.5 rounded-xl border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/50 text-blue-800 dark:text-blue-300 text-sm; }
 }
+

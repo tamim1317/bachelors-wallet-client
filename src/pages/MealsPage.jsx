@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getMembers, getMealsByDate, upsertMeal } from '../utils/api';
 import { UtensilsCrossed, Sun, Sunset, Moon, Calendar, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useSettings } from '../context/SettingsContext';
 
 const today = () => new Date().toISOString().split('T')[0];
 
@@ -42,10 +43,13 @@ export default function MealsPage() {
     setSaving(null);
   };
 
+  const { settings } = useSettings();
+
   const totalFor = (id) => {
-    const m = getMeal(id);
-    return (m.breakfast ? 1 : 0) + (m.lunch ? 1 : 0) + (m.dinner ? 1 : 0) + (m.guestMeals || 0);
-  };
+  const m = getMeal(id);
+  const w = settings.mealWeights || { breakfast: 0.5, lunch: 1, dinner: 1 };
+  return (m.breakfast ? w.breakfast : 0) + (m.lunch ? w.lunch : 0) + (m.dinner ? w.dinner : 0) + (m.guestMeals || 0);
+};
 
   const grandTotal = members.reduce((sum, m) => sum + totalFor(m._id), 0);
 

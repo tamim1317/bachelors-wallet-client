@@ -62,6 +62,9 @@ export const updateRoom     = (id, data)   => api.put(`/rooms/${id}`, data);
 export const deleteRoom     = (id)         => api.delete(`/rooms/${id}`);
 export const assignMember   = (id, data)   => api.post(`/rooms/${id}/assign`, data);
 export const removeMember   = (id, data)   => api.post(`/rooms/${id}/remove-member`, data);
+// Settings
+export const getSettings    = ()     => api.get('/settings');
+export const updateSettings = (data) => api.put('/settings', data);
 
 // Prediction
 export const getPrediction = () => api.get('/prediction');

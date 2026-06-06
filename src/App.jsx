@@ -19,6 +19,9 @@ import BudgetPage     from './pages/BudgetPage';
 import NoticePage     from './pages/NoticePage';
 import RoomPage       from './pages/RoomPage';
 import PredictionPage from './pages/PredictionPage';
+import PageLoader from './components/PageLoader';
+import SettingsPage from './pages/SettingsPage';
+import { Settings } from 'lucide-react';
 
 const navItems = [
   { to: '/',          icon: LayoutDashboard,  label: 'Dashboard' },
@@ -33,16 +36,32 @@ const navItems = [
   { to: '/mess',      icon: DoorOpen,         label: 'Mess' },
   { to: '/rooms',     icon: DoorOpen,         label: 'Rooms' },
   { to: '/prediction',icon: Bot,              label: 'AI Predict' },
+  { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 function DarkToggle() {
   const { dark, toggle } = useTheme();
   return (
     <button onClick={toggle}
-      className="w-8 h-8 rounded-lg flex items-center justify-center
-                 hover:bg-gray-100 dark:hover:bg-gray-800
-                 text-gray-500 dark:text-gray-400 transition-all">
-      {dark ? <Sun size={16} /> : <Moon size={16} />}
+      className="relative w-14 h-7 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+      style={{ background: dark ? '#6366f1' : '#e2e8f0' }}
+      title={dark ? 'Light mode এ যাও' : 'Dark mode এ যাও'}>
+      {/* Track icons */}
+      <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-xs">
+        {dark ? '' : '☀️'}
+      </span>
+      <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-xs">
+        {dark ? '🌙' : ''}
+      </span>
+      {/* Thumb */}
+      <span className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300 flex items-center justify-center ${
+        dark ? 'translate-x-7' : 'translate-x-0.5'
+      }`}>
+        {dark
+          ? <Moon size={12} className="text-indigo-600" />
+          : <Sun size={12} className="text-amber-500" />
+        }
+      </span>
     </button>
   );
 }
@@ -130,7 +149,9 @@ export default function App() {
               <Route path="/mess"      element={<MessPage />} />
               <Route path="/rooms"     element={<RoomPage />} />
               <Route path="/prediction"element={<PredictionPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Routes>
+            
           </div>
         </main>
 
