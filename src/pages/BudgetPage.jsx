@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getBudget, setBudget, getBudgetStatus } from '../utils/api';
+import { Target, AlertTriangle, CheckCircle, TrendingUp, ChevronDown, X, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const now = new Date();
@@ -36,45 +37,38 @@ export default function BudgetPage() {
     e.preventDefault();
     if (!form.totalBudget || form.totalBudget <= 0) return toast.error('মোট budget দিন');
     try {
-      const data = {
+      await setBudget(month, {
         totalBudget: +form.totalBudget,
-        categories: form.categories.filter(c => c.limit > 0).map(c => ({
-          name: c.name,
-          limit: +c.limit
-        }))
-      };
-      await setBudget(month, data);
-      toast.success('Budget সেট হয়েছে ✅');
+        categories: form.categories.filter(c => c.limit > 0).map(c => ({ name: c.name, limit: +c.limit }))
+      });
+      toast.success('Budget সেট হয়েছে!');
       setShowForm(false);
       fetchStatus();
     } catch { toast.error('Error'); }
   };
 
-  const getBarColor = (pct) => {
-    if (pct >= 100) return 'bg-red-500';
-    if (pct >= 80)  return 'bg-orange-500';
-    if (pct >= 50)  return 'bg-yellow-500';
-    return 'bg-green-500';
-  };
+  const getBarColor = (pct) => pct >= 100 ? 'bg-red-500' : pct >= 80 ? 'bg-orange-500' : pct >= 50 ? 'bg-amber-500' : 'bg-emerald-500';
 
-  const getStatusBg = (type) => {
-    if (type === 'danger')  return 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400';
-    if (type === 'warning') return 'bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-400';
-    return 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400';
+  const getAlertStyle = (type) => {
+    if (type === 'danger')  return 'alert-danger';
+    if (type === 'warning') return 'alert-warning';
+    return 'alert-success';
   };
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+      <div className="page-header flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">🎯 Budget Alerts</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">মাসিক budget সেট ও track করুন</p>
+          <h1 className="page-title">Budget Alerts</h1>
+          <p className="page-sub flex items-center gap-1.5">
+            <Target size={14} /> মাসিক budget সেট ও track করুন
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <input type="month" value={month} onChange={e => setMonth(e.target.value)}
             className="input w-auto" />
           <button onClick={() => setShowForm(!showForm)} className="btn-primary">
-            🎯 Budget সেট করুন
+            <Target size={16} /> Budget সেট
           </button>
         </div>
       </div>
@@ -83,7 +77,8 @@ export default function BudgetPage() {
       {status?.alerts?.length > 0 && (
         <div className="space-y-2 mb-5">
           {status.alerts.map((alert, i) => (
-            <div key={i} className={`p-3 rounded-xl border text-sm font-medium ${getStatusBg(alert.type)}`}>
+            <div key={i} className={`flex items-start gap-3 ${getAlertStyle(alert.type)}`}>
+              {alert.type === 'danger' ? <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" /> : <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />}
               {alert.message}
             </div>
           ))}
@@ -93,9 +88,13 @@ export default function BudgetPage() {
       {/* Budget Form */}
       {showForm && (
         <div className="card mb-5">
-          <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">
-            Budget সেট করুন — {month}
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-800 dark:text-gray-200">Budget সেট করুন — {month}</h3>
+            <button onClick={() => setShowForm(false)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400">
+              <X size={15} />
+            </button>
+          </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="label">মোট মাসিক Budget (৳) *</label>
@@ -107,10 +106,8 @@ export default function BudgetPage() {
               <label className="label">Category-wise Limit (ঐচ্ছিক)</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
                 {form.categories.map((cat, i) => (
-                  <div key={cat.name} className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600 dark:text-gray-400 w-32 flex-shrink-0">
-                      {cat.name}
-                    </span>
+                  <div key={cat.name} className="flex items-center gap-3">
+                    <span className="text-sm text-gray-600 dark:text-gray-400 w-36 flex-shrink-0">{cat.name}</span>
                     <input type="number" className="input" placeholder="৳ limit"
                       value={cat.limit}
                       onChange={e => {
@@ -123,33 +120,31 @@ export default function BudgetPage() {
               </div>
             </div>
             <div className="flex gap-2">
-              <button type="submit" className="btn-success">✅ Save করুন</button>
-              <button type="button" onClick={() => setShowForm(false)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
-                বাতিল
-              </button>
+              <button type="submit" className="btn-success">Save করুন</button>
+              <button type="button" onClick={() => setShowForm(false)} className="btn-outline">বাতিল</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Budget Status */}
       {status?.budget ? (
         <>
           {/* Overview Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
             {[
-              { label: 'মোট Budget',  value: `৳${status.budget.totalBudget}`, color: 'blue' },
-              { label: 'খরচ হয়েছে',  value: `৳${status.totalSpent}`,         color: 'red' },
-              { label: 'বাকি আছে',   value: `৳${Math.max(status.remaining, 0)}`, color: status.remaining > 0 ? 'green' : 'red' },
-              { label: 'ব্যবহার',    value: `${status.percentage}%`,          color: status.percentage >= 80 ? 'red' : 'blue' },
+              { label: 'মোট Budget',  value: `৳${status.budget.totalBudget}`, color: 'text-indigo-600 dark:text-indigo-400',  bg: 'bg-indigo-50 dark:bg-indigo-900/20',  icon: Target },
+              { label: 'খরচ হয়েছে',  value: `৳${status.totalSpent}`,         color: 'text-red-600 dark:text-red-400',        bg: 'bg-red-50 dark:bg-red-900/20',        icon: TrendingUp },
+              { label: 'বাকি আছে',   value: `৳${Math.max(status.remaining, 0)}`, color: status.remaining > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400', bg: status.remaining > 0 ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-red-50 dark:bg-red-900/20', icon: CheckCircle },
+              { label: 'ব্যবহার',    value: `${status.percentage}%`,          color: status.percentage >= 80 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400', bg: status.percentage >= 80 ? 'bg-red-50 dark:bg-red-900/20' : 'bg-blue-50 dark:bg-blue-900/20', icon: Target },
             ].map(s => (
-              <div key={s.label}
-                className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-4 text-center">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{s.label}</p>
-                <p className={`text-xl font-bold text-${s.color}-600 dark:text-${s.color}-400`}>
-                  {s.value}
-                </p>
+              <div key={s.label} className="card flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${s.bg}`}>
+                  <s.icon size={18} className={s.color} />
+                </div>
+                <div>
+                  <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -158,21 +153,15 @@ export default function BudgetPage() {
           <div className="card mb-5">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-gray-700 dark:text-gray-300">মোট Budget ব্যবহার</h3>
-              <span className={`text-sm font-bold ${
-                status.percentage >= 100 ? 'text-red-600 dark:text-red-400' :
-                status.percentage >= 80  ? 'text-orange-600 dark:text-orange-400' :
-                'text-green-600 dark:text-green-400'
-              }`}>
+              <span className={`text-sm font-bold ${status.percentage >= 100 ? 'text-red-600' : status.percentage >= 80 ? 'text-orange-600' : 'text-emerald-600'} dark:${status.percentage >= 100 ? 'text-red-400' : status.percentage >= 80 ? 'text-orange-400' : 'text-emerald-400'}`}>
                 {status.percentage}%
               </span>
             </div>
-            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-5 overflow-hidden">
-              <div
-                className={`h-5 rounded-full transition-all duration-700 ${getBarColor(status.percentage)}`}
-                style={{ width: `${Math.min(status.percentage, 100)}%` }}
-              />
+            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-4 overflow-hidden">
+              <div className={`h-4 rounded-full transition-all duration-700 ${getBarColor(status.percentage)}`}
+                style={{ width: `${Math.min(status.percentage, 100)}%` }} />
             </div>
-            <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex justify-between mt-2 text-xs text-gray-400">
               <span>৳{status.totalSpent} খরচ</span>
               <span>৳{status.budget.totalBudget} budget</span>
             </div>
@@ -181,28 +170,18 @@ export default function BudgetPage() {
           {/* Category Progress */}
           {status.budget.categories?.length > 0 && (
             <div className="card">
-              <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                Category-wise Budget
-              </h3>
+              <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">Category-wise Budget</h3>
               <div className="space-y-4">
                 {status.budget.categories.map(cat => {
-                  const spent = 0; // TODO: category wise spending
-                  const pct   = cat.limit > 0 ? Math.min((spent / cat.limit) * 100, 100) : 0;
+                  const pct = 0;
                   return (
                     <div key={cat.name}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {cat.name}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          ৳{spent} / ৳{cat.limit}
-                        </span>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{cat.name}</span>
+                        <span className="text-xs text-gray-400">৳0 / ৳{cat.limit}</span>
                       </div>
                       <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full transition-all duration-500 ${getBarColor(pct)}`}
-                          style={{ width: `${pct}%` }}
-                        />
+                        <div className={`h-2 rounded-full ${getBarColor(pct)}`} style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   );
@@ -212,10 +191,12 @@ export default function BudgetPage() {
           )}
         </>
       ) : (
-        <div className="text-center py-12 text-gray-400 dark:text-gray-600 card">
-          <p className="text-4xl mb-3">🎯</p>
-          <p>এই মাসের জন্য কোনো budget সেট করা হয়নি</p>
-          <p className="text-xs mt-2">উপরে "Budget সেট করুন" বোতাম চাপুন</p>
+        <div className="card text-center py-16">
+          <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+            <Target size={28} className="text-gray-400" />
+          </div>
+          <p className="font-semibold text-gray-700 dark:text-gray-300">Budget সেট করা হয়নি</p>
+          <p className="text-sm text-gray-400 mt-1">উপরে "Budget সেট" বোতাম চাপুন</p>
         </div>
       )}
     </div>
