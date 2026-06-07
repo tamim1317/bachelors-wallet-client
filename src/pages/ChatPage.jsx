@@ -24,9 +24,11 @@ export default function ChatPage() {
     getMessages().then(res => setMessages(res.data.data)).catch(() => {});
 
     // Socket connect করো
-    socketRef.current = io(SOCKET_URL, { transports: ['websocket'] });
-    const socket = socketRef.current;
-
+    socketRef.current = io(SOCKET_URL, {
+  transports: ['websocket', 'polling'], // polling fallback যোগ করো
+  reconnection: true,
+  reconnectionAttempts: 5,
+});
     socket.on('connect', () => {
       socket.emit('user:join', { id: user._id, name: user.name, role: user.role });
     });

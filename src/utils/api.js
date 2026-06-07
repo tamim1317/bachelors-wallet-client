@@ -83,4 +83,10 @@ export const getMessages      = (params)   => api.get('/chat', { params });
 export const sendMessage      = (data)     => api.post('/chat', data);
 export const deleteMessage    = (id)       => api.delete(`/chat/${id}`);
 
+// Auth extras
+export const setSecurityQuestion = (data) => api.post('/auth/security-question', data);
+export const resetPassword       = (data) => api.post('/auth/reset-password', data);
+export const adminResetPassword  = (data) => api.post('/auth/admin-reset', data);
+export const getUsers            = ()     => api.get('/auth/users');
+
 export default api;
