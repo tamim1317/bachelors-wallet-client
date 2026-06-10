@@ -98,7 +98,7 @@ export default function MealsPage() {
 
       {/* Table */}
       <div className="card overflow-x-auto">
-        <table className="w-full">
+        <table className="card overflow-x-auto ">
           <thead>
             <tr className="table-header">
               <th className="th text-left">সদস্য</th>

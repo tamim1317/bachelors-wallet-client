@@ -91,7 +91,8 @@ export default function ChatPage() {
   const getColor = (name) => COLORS[name?.charCodeAt(0) % COLORS.length];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] md:h-[calc(100vh-80px)]">
+    <div className="flex flex-col"
+  style={{ height: 'calc(100dvh - 130px)' }}>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -122,7 +123,8 @@ export default function ChatPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 card overflow-y-auto mb-3 space-y-3 p-4">
+     <div className="flex-1 card overflow-y-auto mb-3 space-y-3 p-3 md:p-4"
+    style={{ overscrollBehavior: 'contain' }}>
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-gray-400 dark:text-gray-600">
@@ -156,7 +158,8 @@ export default function ChatPage() {
                 </span>
               </div>
               <p className="text-sm text-amber-800 dark:text-amber-300">{msg.content}</p>
-            </div>
+            <div ref={bottomRef} />
+  </div>
           );
 
           return (
@@ -233,7 +236,8 @@ export default function ChatPage() {
       {/* Input */}
       <form onSubmit={handleSend} className="card p-3">
         {isManager && (
-          <div className="flex gap-2 mb-2">
+          <div className="card p-3 flex-shrink-0"
+    style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
             {[
               { value: 'text',         label: 'Message' },
               { value: 'announcement', label: '📢 Announcement' },

@@ -121,7 +121,7 @@ export default function BillsPage() {
               </h3>
               <span className="text-xs text-gray-400">{paidCount}/{result.bills.length} পরিশোধ</span>
             </div>
-            <table className="w-full">
+            <table className="card overflow-x-auto ">
               <thead>
                 <tr className="table-header">
                   <th className="th text-left">সদস্য</th>

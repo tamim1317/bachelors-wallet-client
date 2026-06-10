@@ -120,8 +120,8 @@ export default function SettlementPage() {
           {/* Balance Sheet */}
           <div className="card">
             <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">📊 Balance Sheet</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="card overflow-x-auto ">
+              <table className="w-full min-w-[500px">
                 <thead>
                   <tr className="table-header">
                     <th className="th text-left">নাম</th>

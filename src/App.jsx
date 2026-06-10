@@ -173,24 +173,29 @@ function ProtectedLayout() {
         </div>
       </main>
 
-      {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-[#13151F]/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800/60 flex z-50 px-2 py-1">
-        {mobileNav.map(item => (
-          <NavLink key={item.to} to={item.to} end={item.to === '/'}
-            className={({ isActive }) =>
-              `flex-1 flex flex-col items-center py-1.5 rounded-xl text-xs transition-all ${
-                isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-600'
-              }`
-            }>
-            {({ isActive }) => (
-              <>
-                <item.icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
-                <span className="mt-0.5 font-medium">{item.label}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
-      </nav>
+      {/* Mobile bottom nav — icon only, active shows label */}
+<nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-[#13151F]/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800/60 flex z-50"
+  style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+  {mobileNav.map(item => (
+    <NavLink key={item.to} to={item.to} end={item.to === '/'}
+      className={({ isActive }) =>
+        `flex-1 flex flex-col items-center justify-center py-2 transition-all min-h-[56px] ${
+          isActive
+            ? 'text-indigo-600 dark:text-indigo-400'
+            : 'text-gray-400 dark:text-gray-600'
+        }`
+      }>
+      {({ isActive }) => (
+        <>
+          <item.icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
+          {isActive && (
+            <span className="text-[10px] font-semibold mt-0.5">{item.label}</span>
+          )}
+        </>
+      )}
+    </NavLink>
+  ))}
+</nav>
     </div>
   );
 }

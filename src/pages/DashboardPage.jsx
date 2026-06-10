@@ -74,7 +74,8 @@ export default function DashboardPage() {
   const [personalBreakdown, setPersonalBreakdown] = useState([]);
   const [trend, setTrend]   = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const chartHeight = typeof window !== 'undefined' && window.innerWidth < 768 ? 160 : 200;
+  
   useEffect(() => {
     const y = now.getFullYear(), m = now.getMonth() + 1;
     Promise.all([
@@ -173,7 +174,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
         <div className="card">
           <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">৬ মাসের ধারা</p>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <AreaChart data={trend}>
               <defs>
                 <linearGradient id="expG" x1="0" y1="0" x2="0" y2="1">
@@ -198,7 +199,7 @@ export default function DashboardPage() {
         {messBreakdown.length > 0 ? (
           <div className="card">
             <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Mess খরচের ভাগ</p>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={chartHeight}>
               <PieChart>
                 <Pie data={messBreakdown} dataKey="value" nameKey="name"
                   cx="50%" cy="50%" outerRadius={80} innerRadius={45}
