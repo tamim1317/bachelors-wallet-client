@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react';
 import { getMembers, createMember, deleteMember } from '../utils/api';
 import { UserPlus, User, Phone, Home, Trash2, Users, X } from 'lucide-react';
+import { SkeletonCard } from '../components/Skeleton';
 import toast from 'react-hot-toast';
 
 export default function MembersPage() {
   const [members, setMembers]   = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm]         = useState({ name: '', room: '', phone: '' });
-  const [loading, setLoading]   = useState(false);
+  const [loading, setLoading]   = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchMembers = async () => {
     try {
       const res = await getMembers();
       setMembers(res.data.data);
     } catch { toast.error('Member লোড হয়নি'); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { fetchMembers(); }, []);
@@ -21,7 +24,7 @@ export default function MembersPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) return toast.error('নাম দিন');
-    setLoading(true);
+    setSubmitting(true);
     try {
       await createMember(form);
       toast.success('Member যোগ হয়েছে!');
@@ -29,7 +32,7 @@ export default function MembersPage() {
       setShowForm(false);
       fetchMembers();
     } catch { toast.error('Error হয়েছে'); }
-    setLoading(false);
+    finally { setSubmitting(false); }
   };
 
   const handleDelete = async (id, name) => {
@@ -105,8 +108,8 @@ export default function MembersPage() {
               </div>
             </div>
             <div className="md:col-span-3 flex gap-2 pt-1">
-              <button type="submit" disabled={loading} className="btn-success">
-                {loading ? 'যোগ হচ্ছে...' : 'যোগ করুন'}
+              <button type="submit" disabled={submitting} className="btn-success">
+                {submitting ? 'যোগ হচ্ছে...' : 'যোগ করুন'}
               </button>
               <button type="button" onClick={() => setShowForm(false)} className="btn-outline">
                 বাতিল
@@ -118,9 +121,33 @@ export default function MembersPage() {
 
       {/* Members Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {members.map((m, i) => (
+
+        {/* Loading skeleton */}
+        {loading && Array.from({ length: 6 }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+
+        {/* Empty state */}
+        {!loading && members.length === 0 && (
+          <div className="md:col-span-3 card text-center py-16">
+            <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+              <Users size={28} className="text-gray-400" />
+            </div>
+            <p className="font-semibold text-gray-700 dark:text-gray-300">কোনো member নেই</p>
+            <p className="text-sm text-gray-400 dark:text-gray-600 mt-1">
+              উপরের বোতাম চেপে প্রথম member যোগ করুন
+            </p>
+            <button onClick={() => setShowForm(true)} className="btn-primary mx-auto mt-4">
+              <UserPlus size={15} /> Member যোগ করুন
+            </button>
+          </div>
+        )}
+
+        {/* Member cards */}
+        {!loading && members.map((m, i) => (
           <div key={m._id}
             className="card flex items-center gap-4 hover:shadow-md hover:border-indigo-100 dark:hover:border-indigo-900/50 transition-all duration-200">
+
             {/* Avatar */}
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold flex-shrink-0 ${AVATAR_COLORS[i % AVATAR_COLORS.length]}`}>
               {m.name.charAt(0).toUpperCase()}
@@ -151,17 +178,6 @@ export default function MembersPage() {
           </div>
         ))}
 
-        {members.length === 0 && (
-          <div className="md:col-span-3 card text-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
-              <Users size={28} className="text-gray-400" />
-            </div>
-            <p className="font-semibold text-gray-700 dark:text-gray-300">কোনো member নেই</p>
-            <p className="text-sm text-gray-400 dark:text-gray-600 mt-1">
-              উপরের বোতাম চেপে প্রথম member যোগ করুন
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

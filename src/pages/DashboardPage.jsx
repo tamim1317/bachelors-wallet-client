@@ -3,6 +3,7 @@ import { getMembers, getExpenses, getMonthlySummary, getIncomeSummary } from '..
 import { Users, TrendingUp, TrendingDown, UtensilsCrossed, PiggyBank, ShoppingCart, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useNavigate } from 'react-router-dom';
+import { SkeletonDashboard } from '../components/Skeleton';
 
 const now = new Date();
 const COLORS = ['#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
@@ -113,15 +114,14 @@ export default function DashboardPage() {
   }, []);
 
   if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="text-center">
-        <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mx-auto mb-3 animate-pulse">
-          <ShoppingCart size={22} className="text-indigo-500" />
-        </div>
-        <p className="text-sm text-gray-400">লোড হচ্ছে...</p>
-      </div>
+  <div>
+    <div className="page-header">
+      <div className="h-7 w-32 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse mb-2" />
+      <div className="h-4 w-48 bg-gray-100 dark:bg-gray-800 rounded-full animate-pulse" />
     </div>
-  );
+    <SkeletonDashboard />
+  </div>
+);
 
   const spentPct = stats.income > 0 ? Math.min(((stats.messTotal + stats.personalTotal) / stats.income) * 100, 100) : 0;
 

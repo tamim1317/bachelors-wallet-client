@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getExpenses, createExpense, deleteExpense } from '../utils/api';
 import { Plus, Trash2, Wallet, ShoppingCart, X, TrendingDown } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { SkeletonList } from '../components/Skeleton';
 
 const MESS_CATEGORIES     = ['বাজার', 'গ্যাস', 'বিদ্যুৎ', 'পানি', 'অন্যান্য'];
 const PERSONAL_CATEGORIES = ['রুম ভাড়া', 'বাইরে খাওয়া', 'ট্রান্সপোর্ট', 'মোবাইল রিচার্জ', 'পড়াশোনা', 'শপিং', 'অন্যান্য'];
@@ -16,14 +17,16 @@ export default function ExpensesPage() {
     type: 'mess', category: 'বাজার', amount: '', note: '',
     date: now.toISOString().split('T')[0]
   });
+  const [loading, setLoading] = useState(true);
 
   const fetchExpenses = async () => {
-    try {
-      const res = await getExpenses({ type: tab, month: now.getMonth() + 1, year: now.getFullYear() });
-      setExpenses(res.data.data);
-      setTotal(res.data.total);
-    } catch { toast.error('লোড হয়নি'); }
-  };
+  try {
+    const res = await getExpenses({ type: tab, month: now.getMonth() + 1, year: now.getFullYear() });
+    setExpenses(res.data.data);
+    setTotal(res.data.total);
+  } catch { toast.error('লোড হয়নি'); }
+  finally { setLoading(false); }
+};
 
   useEffect(() => { fetchExpenses(); }, [tab]);
 
