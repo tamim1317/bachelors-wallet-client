@@ -5,6 +5,7 @@ import { ThemeProvider }    from './context/ThemeContext'
 import { AuthProvider }     from './context/AuthContext'
 import { SettingsProvider } from './context/SettingsContext'
 import { MessProvider }     from './context/MessContext'
+import { SocketProvider } from './context/SocketContext'
 import { registerSW }       from './utils/pwa'
 import './index.css'
 
@@ -16,7 +17,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <SettingsProvider>
           <MessProvider>
+            <SocketProvider>
             <App />
+            </SocketProvider>
           </MessProvider>
         </SettingsProvider>
       </AuthProvider>

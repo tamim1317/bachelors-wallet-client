@@ -1,89 +1,69 @@
 import { useState, useEffect, useRef } from 'react';
 import { getMessages, sendMessage, deleteMessage } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { io } from 'socket.io-client';
+import { useSocket } from '../context/SocketContext';
 import { MessageCircle, Send, Trash2, Megaphone, Wifi, WifiOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
 export default function ChatPage() {
-  const { user, isManager } = useAuth();
-  const [messages, setMessages]       = useState([]);
-  const [onlineUsers, setOnlineUsers] = useState([]);
-  const [input, setInput]             = useState('');
-  const [type, setType]               = useState('text');
-  const [typing, setTyping]           = useState('');
-  const [sending, setSending]         = useState(false);
-  const [connected, setConnected]     = useState(false);
+  const { user, isManager }                     = useAuth();
+  const { socket, connected, onlineUsers }       = useSocket();
 
-  const socketRef   = useRef(null);
+  const [messages, setMessages]   = useState([]);
+  const [input, setInput]         = useState('');
+  const [type, setType]           = useState('text');
+  const [typing, setTyping]       = useState('');
+  const [sending, setSending]     = useState(false);
+
   const bottomRef   = useRef(null);
   const typingTimer = useRef(null);
 
+  // Load messages
   useEffect(() => {
-    // Messages load করো
     getMessages()
       .then(res => setMessages(res.data.data))
       .catch(() => {});
+  }, []);
 
-    // Socket connect করো
-    const socket = io(SOCKET_URL, {
-  transports: ['polling', 'websocket'],
-  reconnection: true,
-  reconnectionAttempts: 5,
-});
+  // Socket events
+  useEffect(() => {
+    if (!socket) return;
 
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      setConnected(true);
-      socket.emit('user:join', {
-        id:   user._id,
-        name: user.name,
-        role: user.role
-      });
-    });
-
-    socket.on('disconnect', () => {
-      setConnected(false);
-    });
-
-    socket.on('chat:message', (msg) => {
+    const onMessage = (msg) => {
       setMessages(prev => [...prev, msg]);
-    });
+    };
 
-    socket.on('chat:system', (msg) => {
+    const onSystem = (msg) => {
       setMessages(prev => [...prev, { ...msg, _id: Date.now() + Math.random() }]);
-    });
+    };
 
-    socket.on('users:online', (users) => {
-      setOnlineUsers(users);
-    });
-
-    socket.on('chat:typing', (data) => {
+    const onTyping = (data) => {
       if (data.userId !== user._id) {
         setTyping(`${data.name} লিখছে...`);
         clearTimeout(typingTimer.current);
         typingTimer.current = setTimeout(() => setTyping(''), 2000);
       }
-    });
+    };
+
+    socket.on('chat:message', onMessage);
+    socket.on('chat:system',  onSystem);
+    socket.on('chat:typing',  onTyping);
 
     return () => {
+      socket.off('chat:message', onMessage);
+      socket.off('chat:system',  onSystem);
+      socket.off('chat:typing',  onTyping);
       clearTimeout(typingTimer.current);
-      socket.disconnect();
     };
-  }, []);
+  }, [socket, user._id]);
 
+  // Auto scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleTyping = () => {
-    socketRef.current?.emit('chat:typing', {
-      userId: user._id,
-      name:   user.name
-    });
+    socket?.emit('chat:typing', { userId: user._id, name: user.name });
   };
 
   const handleSend = async (e) => {
@@ -92,7 +72,7 @@ export default function ChatPage() {
     setSending(true);
     try {
       const res = await sendMessage({ content: input.trim(), type });
-      socketRef.current?.emit('chat:message', res.data.data);
+      socket?.emit('chat:message', res.data.data);
       setInput('');
       setType('text');
     } catch (err) {
@@ -116,7 +96,6 @@ export default function ChatPage() {
     'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
     'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300',
   ];
-
   const getColor = (name) => COLORS[(name?.charCodeAt(0) || 0) % COLORS.length];
 
   return (
@@ -130,12 +109,11 @@ export default function ChatPage() {
             <MessageCircle size={22} className="text-indigo-600 dark:text-indigo-400" />
             Mess Chat
           </h1>
-          <p className="page-sub flex items-center gap-1.5">
+          <p className="page-sub">
             {connected
-              ? <Wifi size={12} className="text-emerald-500" />
-              : <WifiOff size={12} className="text-red-400" />
+              ? <><Wifi size={12} className="text-emerald-500" /> {onlineUsers.length} জন online</>
+              : <><WifiOff size={12} className="text-red-400" /> Connecting...</>
             }
-            {connected ? `${onlineUsers.length} জন online` : 'Connecting...'}
           </p>
         </div>
 
@@ -199,7 +177,6 @@ export default function ChatPage() {
             <div key={msg._id || i}
               className={`flex gap-2 group ${isOwn ? 'flex-row-reverse' : ''}`}>
 
-              {/* Avatar */}
               {!isOwn && (
                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 mt-1 ${getColor(msg.sender?.name)}`}>
                   {msg.sender?.name?.charAt(0)}
@@ -207,7 +184,6 @@ export default function ChatPage() {
               )}
 
               <div className={`max-w-[75%] md:max-w-[65%] flex flex-col gap-1 ${isOwn ? 'items-end' : 'items-start'}`}>
-                {/* Sender name + role */}
                 {!isOwn && (
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
@@ -221,25 +197,20 @@ export default function ChatPage() {
                   </div>
                 )}
 
-                {/* Bubble */}
                 <div className={`relative px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
                   isOwn
                     ? 'bg-indigo-600 text-white rounded-tr-sm'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-tl-sm'
                 }`}>
                   {msg.content}
-
-                  {/* Delete button */}
                   {(isOwn || isManager) && msg._id && typeof msg._id === 'string' && (
-                    <button
-                      onClick={() => handleDelete(msg._id)}
+                    <button onClick={() => handleDelete(msg._id)}
                       className={`absolute -top-2 ${isOwn ? '-left-2' : '-right-2'} w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm`}>
                       <Trash2 size={10} />
                     </button>
                   )}
                 </div>
 
-                {/* Timestamp */}
                 <span className="text-[10px] text-gray-400 dark:text-gray-600">
                   {msg.createdAt
                     ? new Date(msg.createdAt).toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' })
@@ -275,7 +246,6 @@ export default function ChatPage() {
       <div className="card p-3 flex-shrink-0"
         style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
 
-        {/* Announcement toggle — manager only */}
         {isManager && (
           <div className="flex gap-2 mb-2">
             {[
@@ -287,7 +257,7 @@ export default function ChatPage() {
                 className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                   type === t.value
                     ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                 }`}>
                 {t.label}
               </button>
